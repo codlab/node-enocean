@@ -32,7 +32,7 @@ module.exports     = function(app,config){
 		fs.writeFileSync(outFile,"{}")
 	}
 	knownSensors   = require( outFile ) // load the sensorFile
-	app.learnMode  = "off"
+	app.learnMode  = "on"
 	app.forgetMode = "off"
 
 	app.on( "data" , function( data ) {
