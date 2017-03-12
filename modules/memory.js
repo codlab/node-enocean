@@ -230,13 +230,13 @@ module.exports     = function(app,config){
 		} )
 	}
 
-	app.info = async function ( id ) {
+	app.info = function ( id ) {
 		// get info of a specific sensor
 		var sensor = knownSensors[ id ]
 		return sensor
 	}
-	app.getLastValues = async function(id){
-		return await getLastData(id)
+	app.getLastValues = function(id){
+		return getLastData(id)
 	}
 	app.getSensors = function( ) {
 		// return all known sensors
