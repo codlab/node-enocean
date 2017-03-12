@@ -13,7 +13,7 @@
 //     You should have received a copy of the GNU General Public License
 //     along with node-enocean.  If not, see <http://www.gnu.org/licenses/>.
 
-var SerialPort   = require( "serialport" ).SerialPort
+var SerialPort   = require( "serialport" )
 var EventEmitter = require( 'events' ).EventEmitter
 var fs           = require( "fs" )
 var Telegram     = require( "./modules/telegram.js" )
