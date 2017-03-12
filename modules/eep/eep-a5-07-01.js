@@ -12,26 +12,26 @@ module.exports=function(eep,data){
 
 	val1=Help.extractByteValue(3,0,250,0,5,data)
 	vol={
-			type:"Voltage",
-			unit:"V",
-			value: val1
-		}
+		type:"voltage",
+		unit:"V",
+		value: val1
+	}
 	var contact=["not supported","supported"]
 
 	if(eep==="a5-07-01"){
 		ret = [{
-			type:"PIR Status",
+			type:"pir_status",
 			unit:"",
 			value: pir
 		},
 		{
-			type:"Supply voltage",
+			type:"supply_voltage",
 			unit:"",
 			value: contact[i]
 		}
-		]
-		if(i==1) ret.push(vol)
-		return ret
-	}
+	]
+	if(i==1) ret.push(vol)
 	return ret
+}
+return ret
 }

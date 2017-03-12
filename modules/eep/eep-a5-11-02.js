@@ -44,35 +44,35 @@ module.exports=function(eep,data){
 		mode= ["Heating","Cooling","Off"]
 
 		ret=[{
-			type:"Setpoint Temperature",
+			type:"setpoint_temperature",
 			unit:"°C",
 			value: val1
 		},{
-			type:"Controller Value",
+			type:"controller_value",
 			unit:"%",
 			value: val2
 		},{
-			type:"Fan Stage",
+			type:"fan_stage",
 			unit:"",
 			value: fanstages[i]
 		},{
-			type:"Occupancy",
+			type:"occupancy",
 			unit:"",
 			value: occu[i2]
 		},{
-			type:"Energy hold-off",
+			type:"energy_hold-off",
 			unit:"",
 			value: NRG[i1]
 		},{
-			type:"Controller State",
+			type:"controller_state",
 			unit:"",
 			value: CState[i3]
 		},{
-			type:"Alarm",
+			type:"alarm",
 			unit:"",
 			value: Alarm[i4]
 		},{
-			type:"Controller mode",
+			type:"controller_mode",
 			unit:"",
 			value: mode[i5]
 		}]

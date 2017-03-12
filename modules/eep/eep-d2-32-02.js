@@ -19,19 +19,19 @@ module.exports=function(eep,data){
 			unit:"",
 			value: 1/devisor
 		},{
-			type:"Current",
+			type:"current",
 			unit:"A",
 			value: rawVal1/devisor
 		},{
-			type:"Current",
+			type:"current",
 			unit:"A",
 			value: rawVal2/devisor
 		},{
-			type:"Current",
+			type:"current",
 			unit:"A",
 			value: rawVal3/devisor
 		},{
-			type:"Power Fail",
+			type:"power_fail",
 			unit:"",
 			value: powerFailBit
 		}]

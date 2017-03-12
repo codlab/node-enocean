@@ -10,7 +10,7 @@ module.exports=function(eep,data){
 	var contact=["open","closed"]
 	if(eep==="d5-00-01"){
 		return [{
-			type:"Contact",
+			type:"contact",
 			unit:"",
 			value: contact[i]
 		}]

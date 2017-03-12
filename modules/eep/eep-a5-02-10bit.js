@@ -17,6 +17,6 @@ module.exports=function(eep,data){
 	return ret
 }
 var sensors={
-20:{min:-10,max:41.2}, //10
-30:{min:-40,max:62.3}, //20
+	20:{min:-10,max:41.2}, //10
+	30:{min:-40,max:62.3}, //20
 }

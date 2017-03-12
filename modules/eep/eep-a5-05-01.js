@@ -10,15 +10,15 @@ module.exports=function(eep,data){
 		var val1 = Help.extract10BitValue(1,0,1023,500,1150,data)
 		var trigger = "heartbeat"
 		var trg= Help.extractBitEnum(0,1,1,data,["heartbeat","event"])
-			ret=[{
-				type:"barometric pressure",
-				unit:"hPa",
-				value: val1
-			},{
-				type: "trigger",
-				value: trg,
-				unit:""
-			}]
+		ret=[{
+			type:"barometric_pressure",
+			unit:"hPa",
+			value: val1
+		},{
+			type: "trigger",
+			value: trg,
+			unit:""
+		}]
 		return ret
 	}
 	return ret

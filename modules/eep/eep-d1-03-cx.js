@@ -31,59 +31,59 @@ module.exports=function(eep,data){
 		var st=(status & 48)>>>4
 		var times=[10,20,30,100]
 		return [{
-			type:"Temperature Ch1 (1)",
+			type:"temperature_ch1_1",
 			unit:"°C",
 			value: val11
 		},{
-			type:"Temperature Ch1 (2)",
+			type:"temperature_ch1_2",
 			unit:"°C",
 			value: val12
 		},{
-			type:"Temperature Ch1 (3)",
+			type:"temperature_ch1_3",
 			unit:"°C",
 			value: val13
 		},{
-			type:"Temperature Ch2 (1)",
+			type:"temperature_ch2_1",
 			unit:"°C",
 			value: val21
 		},{
-			type:"Temperature Ch2 (2)",
+			type:"temperature_ch2_2",
 			unit:"°C",
 			value: val22
 		},{
-			type:"Temperature Ch2 (3)",
+			type:"temperature_ch2_3",
 			unit:"°C",
 			value: val23
 		},{
-			type:"Temperature Ch3 (1)",
+			type:"temperature_ch3_1",
 			unit:"°C",
 			value: val31
 		},{
-			type:"Temperature Ch3 (2)",
+			type:"temperature_ch3_2",
 			unit:"°C",
 			value: val32
 		},{
-			type:"Temperature Ch3 (3)",
+			type:"temperature_ch3_3",
 			unit:"°C",
 			value: val33
 		},{
-			type:"Temperature internal",
+			type:"temperature_internal",
 			unit:"°C",
 			value: valInt
 		},{
-			type:"Power Source",
+			type:"power_source",
 			unit:"",
 			value: ps==0?"battery":"solar"
 		},{
-			type:"Battery Status",
+			type:"battery_status",
 			unit:"",
 			value: bs==0?"low":"normal"
 		},{
-			type:"Sample Time",
+			type:"sample_time",
 			unit:"s",
 			value: times[st]
 		},{
-			type:"Range",
+			type:"range",
 			unit:"°C",
 			value: type=="c1"?"-20 to +100":"0 to +85"
 		},]

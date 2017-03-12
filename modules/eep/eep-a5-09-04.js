@@ -12,21 +12,21 @@ module.exports=function(eep,data){
 		var val1 = Help.extractByteValue(1,0,255,0,51,data)
 
 		ret=[
-      {
-				type:"Humidity",
+			{
+				type:"humidity",
 				unit:"%",
 				value: val3
 			},{
-				type:"Concentration",
+				type:"concentration",
 				unit:"ppm",
 				value: val2
 			},{
-				type:"Temperature",
+				type:"temperature",
 				unit:"°C",
 				value: val1
 			}
-    ]
+		]
 		return ret
 	}
-  return null
+	return null
 }

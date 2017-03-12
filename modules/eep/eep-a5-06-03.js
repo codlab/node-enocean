@@ -11,18 +11,16 @@ module.exports=function(eep,data){
 		val2=Help.extractByteValue(3,0,250,0,5,data)
 		var select=Help.extractBitValue(0,0,1,data)
 		
-
-
 		ret=[{
-				type:"illumination",
-				unit:"lux",
-				value: val1
-			},
-			{
-				type:"voltage",
-				unit:"V",
-				value: val2
-			}]
+			type:"illumination",
+			unit:"lux",
+			value: val1
+		},
+		{
+			type:"voltage",
+			unit:"V",
+			value: val2
+		}]
 
 		return ret
 	}
