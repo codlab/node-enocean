@@ -60,7 +60,7 @@ module.exports     = function(app,config){
 
 	app.on( "data" , function( data ) {
 		EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
-			if( sensor !== undefined) {
+			if( sensor != undefined) {
 				if( data.learnBit === 1 || data.choice === "f6" || data.choice === "d1") {
 					// but only if it is not a learn Telegram (learnBit==1)
 					data.sensor = sensor // attach that info to the telegram data
