@@ -25,13 +25,12 @@ function SerialPortListener( config ) {
 	// read the config object passed to the constructor. fill the non existin fileds with defaults
 	this.timeout        = config.timeout ? config.timeout : 60 // set the timeout for tech in and forget auto mode to 60 s if not otehrwise specified
 	this.configFilePath = config.configFilePath ? config.configFilePath : __dirname + "/config.json" // use the default config file. its recommended to use your own especially when hacking on this module.
-	this.sensorFilePath = config.sensorFilePath ? config.sensorFilePath : __dirname + "/modules/knownSensors.json" // same goes for the sensor file in which learnd sensors are stored
 	if(!fs.existsSync(this.configFilePath)){
 		fs.writeFileSync(this.configFilePath,'{"base":"00000000"}')
 	}
-	if(!fs.existsSync(this.sensorFilePath)){
-		fs.writeFileSync(this.sensorFilePath,'{}')
-	}
+
+	this.mem    = new Memory( this ); // initialize the Memory implementation used for learning an forgetting sensors. all meaningfull events are emitted there
+
 	var configFile      = require(this.configFilePath) // load the config file
 	this.base           = configFile.base // load the base address stored in the config file. It should be initialized with "00000000"
 
@@ -60,7 +59,6 @@ function SerialPortListener( config ) {
 		serialPort      = new SerialPort( port , { baudrate: 57600 , parser: parser } )
 		serialPort.on( "open" , function( ) {
 			// when the serial port successfully opend
-			this.mem    = new Memory( this , { sensorFilePath : this.sensorFilePath } ) // initialize the Memory implementation used for learning an forgetting sensors. all meaningfull events are emitted there
 			if( configFile.base === "00000000" || !configFile.hasOwnProperty( "base" ) ) { // if we dont know the base address yet
 				this.getBase( ) // get the base address from the attached device
 			} else { // if we know the base address
