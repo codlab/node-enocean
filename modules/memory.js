@@ -34,6 +34,7 @@ module.exports     = function(app,config){
 
 	app.connect = function(mongo_path) {
 		mongoose.connect(mongo_path);
+		db = mongoose.connection;
 
 		db.on("error", function(err) {
 			console.error.bind(console, 'connection error:');
