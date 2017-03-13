@@ -212,6 +212,9 @@ function SerialPortListener( config ) {
 	this.register = function( socket ) {
 		// rergister for event emitters.
 		// we are lsitening for the following events:
+		socket.on("get-learning-state", function() {
+			socket.emit("learning-state", this.mem.learnMode ) // returns info for one single sensor
+		});
 		socket.on( "start-learning" , this.startLearning ) // start learn mode
 		socket.on( "start-forgetting" , this.startForgetting ) // start forget mode
 		socket.on( "stop-learning" , this.stopLearning ) // stop learn mode
@@ -231,15 +234,15 @@ function SerialPortListener( config ) {
 		}.bind( this) )
 		socket.on( "get-last-sensor-value" , function( id ) {
 			socket.emit("last-sensors-value", {err:"todo"}) // returns info for one single sensor
-			/*this.getLastValues(id)
-			.then(function(value) {
-			socket.emit("last-sensors-value", value) // returns info for one single sensor
-		});*/
-	}.bind( this) )
-	//socket.on( "get-last-sensor-value" , async function( id ) {
-	//	socket.emit("last-sensors-value", await this.getLastValues( id ) ) // returns info for one single sensor
-	//}.bind( this) )
-}
+			//this.getLastValues(id)
+			//.then(function(value) {
+			//socket.emit("last-sensors-value", value) // returns info for one single sensor
+			//});
+		}.bind( this) )
+		//socket.on( "get-last-sensor-value" , async function( id ) {
+		//	socket.emit("last-sensors-value", await this.getLastValues( id ) ) // returns info for one single sensor
+		//}.bind( this) )
+	}
 }
 
 SerialPortListener.prototype.__proto__ = EventEmitter.prototype // inherit from EventEmitter

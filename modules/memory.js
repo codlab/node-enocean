@@ -54,6 +54,11 @@ module.exports     = function(app,config){
 			});
 
 			EnoceanSensor = mongoose.model('EnoceanSensor', EnoceanSensorScheme);
+
+			app.emitters.forEach( function( emitter ) {
+				emitter.emit( "sensor-db-open" , { err : err, reason: "error saving sensor file to disk" } ) // there was an error saving the file
+			});
+
 		});
 
 	}
