@@ -220,7 +220,7 @@ module.exports     = function(app,config){
 	}
 
 	app.forget = function( id ) {
-		EnoceanSensor.findOneAndRemove({ id: data.senderId }, function (err, sensor) {
+		EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
 			app.forgetMode="off" // stop forget Mode
 			clearTimeout(this.timerId);
 			app.emitters.forEach( function( emitter ) {
@@ -241,7 +241,7 @@ module.exports     = function(app,config){
 	}
 
 	app.info = function ( id, callback) {
-		EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
+		EnoceanSensor.findOne({ id: id }, function (err, sensor) {
 			callback(sensor);
 		});
 	}
