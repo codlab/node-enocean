@@ -22,6 +22,7 @@ var Memory       = require( "./modules/memory.js" )
 var eepDesc      = require("./modules/eepDesc.js")
 var parser       = require("serialport-enocean-parser")
 function SerialPortListener( config ) {
+	var self = this;
 	// read the config object passed to the constructor. fill the non existin fileds with defaults
 	this.timeout        = config.timeout ? config.timeout : 60 // set the timeout for tech in and forget auto mode to 60 s if not otehrwise specified
 	this.configFilePath = config.configFilePath ? config.configFilePath : __dirname + "/config.json" // use the default config file. its recommended to use your own especially when hacking on this module.
@@ -213,7 +214,7 @@ function SerialPortListener( config ) {
 		// rergister for event emitters.
 		// we are lsitening for the following events:
 		socket.on("get-learning-state", function() {
-			socket.emit("learning-state", this.mem.learnMode ) // returns info for one single sensor
+			socket.emit("learning-state", self.mem.learnMode ) // returns info for one single sensor
 		});
 		socket.on( "start-learning" , this.startLearning ) // start learn mode
 		socket.on( "start-forgetting" , this.startForgetting ) // start forget mode
