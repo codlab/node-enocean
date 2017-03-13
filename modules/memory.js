@@ -19,119 +19,131 @@
 //     this module implements saving and deleting sensors as well as hanbling telegrams from known sensor
 //     this implementation uses the fiesystem to stor sensor info
 
-var fs             = require("fs")
-var level          = require("level")
-var knownSensors   = ""
-var db             = level("./memory",{valueEncoding:'json'})
+var mongoose = require("mongoose");
+
+var db = undefined;
+var EnoceanSensor = undefined;
+
+
+
 module.exports     = function(app,config){
 	this.timerId=null
-	if( config    == undefined) config = {} // check if this was called with a config or not
-	// if a path to the sensorFile was provided use that, otherwise use the default
-	var outFile    = config.hasOwnProperty( "sensorFilePath" ) ? config.sensorFilePath : __dirname + '/knownSensors.json'
-	if(!fs.existsSync(outFile)){
-		fs.writeFileSync(outFile,"{}")
-	}
-	knownSensors   = require( outFile ) // load the sensorFile
+
 	app.learnMode  = "on"
 	app.forgetMode = "off"
 
-	app.on( "data" , function( data ) {
-		if ( knownSensors.hasOwnProperty( data.senderId )) {
-			//if sensor is known, extract the content of the Data Bits.
-			// if(data.choice==="d2"){
-			// 	data.sensor  = knownSensors[ data.senderId ]
-			// 	data.values = app.getData( data.sensor.eep , data.raw )
-			// 	knownSensors[ data.senderId ].last = data.values
-			// 	app.emitters.forEach(function(emitter){
-			// 		emitter.emit("known-data",data) // and emmit an event propagating the extracted Data downstream
-			// 	} )
-			// 	fs.writeFile( outFile , JSON.stringify( knownSensors , null , 4 ) , function( err ) {} )
-			// }
-			if( data.learnBit === 1 || data.choice === "f6" || data.choice === "d1") {
-				// but only if it is not a learn Telegram (learnBit==1)
-				var sensor  = knownSensors[ data.senderId ] // get the sensor Info like the eep and manufacurer Info from the memory file
-				data.sensor = sensor // attach that info to the telegram data
-				data.values = app.getData( sensor.eep , data.raw ) // actually extract the Data
-				db.put(data.senderId ,data,function(err){}) // store this Telegram in memory
-				app.emitters.forEach(function(emitter){
-					emitter.emit("known-data",data) // and emmit an event propagating the extracted Data downstream
-				} )
+	app.connect = function(mongo_path) {
+		mongoose.connect(mongo_path);
 
-				fs.writeFile( outFile , JSON.stringify( knownSensors , null , 4 ) , function( err ) {} ) // and save it to disk
-			} else {
-				// if it is a learn telegram, check if we are in "teach in"-mode
-				if( app.learnMode === "on" ) {
-					// we are in teach in mode
-					// And we have just received a "tech in" telegram...
-					// but we allready know this sensor
-					app.learnMode = "off" // turn of "teach in"-mode to prevent unwanted sensors to be tought in accedently
-					app.emitters.forEach( function( emitter ) {
-						emitter.emit( "learn-mode-stop" , { code : 1 , reason : "already known sensor" } ) // tell everyone that we stop the "teach-in"-mode
+		db.on("error", function(err) {
+			console.error.bind(console, 'connection error:');
+		});
+
+		db.once('open', function() {
+			console.log("connection ok");
+
+			var EnoceanSensorScheme = mongoose.Schema({
+				id: String,
+				eep: String,
+				manufacturer: String,
+				title: String,
+				desc: String,
+				eepFunc: String,
+				eepType: String
+			});
+
+			EnoceanSensor = mongoose.model('EnoceanSensor', EnoceanSensorScheme);
+		});
+
+	}
+
+	app.on( "data" , function( data ) {
+		EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
+			if( sensor !== undefined) {
+				if( data.learnBit === 1 || data.choice === "f6" || data.choice === "d1") {
+					// but only if it is not a learn Telegram (learnBit==1)
+					data.sensor = sensor // attach that info to the telegram data
+					data.values = app.getData( sensor.eep , data.raw ) // actually extract the Data
+
+					//was also saving last data in db but removed it, useful?
+					app.emitters.forEach(function(emitter){
+						emitter.emit("known-data",data) // and emmit an event propagating the extracted Data downstream
 					} )
+				} else {
+					// if it is a learn telegram, check if we are in "teach in"-mode
+					if( app.learnMode === "on" ) {
+						// we are in teach in mode
+						// And we have just received a "tech in" telegram...
+						// but we allready know this sensor
+						app.learnMode = "off" // turn of "teach in"-mode to prevent unwanted sensors to be tought in accedently
+						app.emitters.forEach( function( emitter ) {
+							emitter.emit( "learn-mode-stop" , { code : 1 , reason : "already known sensor" } ) // tell everyone that we stop the "teach-in"-mode
+						} )
+					}
+					if( app.forgetMode === "on" ) {
+						// we are in forget mode, and we received a "teach-in" telegram of a known sensor
+						// this indicates that it should be forgotten.
+						app.forget( data.senderId ) // delete the sensor
+					}
 				}
-				if( app.forgetMode === "on" ) {
-					// we are in forget mode, and we received a "teach-in" telegram of a known sensor
-					// this indicates that it should be forgotten.
-					app.forget( data.senderId ) // delete the sensor
-				}
-			}
-			if( app.forgetMode === "on" && data.choice === "f6" ) {
+				if( app.forgetMode === "on" && data.choice === "f6" ) {
 					// we are in forget mode, and we received an RPS telegram form a known sensor
 					// but the learnBit is not set, as RPS telegramns don't have learnBits...
 					// this indicates that it should be forgotten.
 					app.forget( data.senderId ) // delete the sensor
 				}
-		} else {
-		// ???? we don't know this sensor ???
-			if( data.learnBit === 0 ) {
-			// but it's a "teach in"-telegram, so it wants to tell us about itself
-				if( app.learnMode === "on" ) {
-				// we are in learnMode, so extract the sensor info frm the telegram
-				// and save that info
-					if(data.choice==="d5") data.eep="d5-00-01" //its a 1BS Telegram there is currently only 1 defined so assume d5-00-01
-					app.learn( {
-						id           : data.senderId,
-						eep          : data.eep,
-						manufacturer : data.manufacturer,
-						title        : "New " + app.eepDesc[data.eep.substring(0,5)],           // give it some name
-						desc         : "I'm a new sensor...",  // and some description
-						eepFunc      : app.eepDesc[data.eep.substring(0,5)], // finde the func description of the eep
-						eepType      : app.eepDesc[data.eep]   // find the Type description of the eep
-					} )
+			} else {
+				// ???? we don't know this sensor ???
+				if( data.learnBit === 0 ) {
+					// but it's a "teach in"-telegram, so it wants to tell us about itself
+					if( app.learnMode === "on" ) {
+						// we are in learnMode, so extract the sensor info frm the telegram
+						// and save that info
+						if(data.choice==="d5") data.eep="d5-00-01" //its a 1BS Telegram there is currently only 1 defined so assume d5-00-01
+						app.learn( {
+							id           : data.senderId,
+							eep          : data.eep,
+							manufacturer : data.manufacturer,
+							title        : "New " + app.eepDesc[data.eep.substring(0,5)],           // give it some name
+							desc         : "I'm a new sensor...",  // and some description
+							eepFunc      : app.eepDesc[data.eep.substring(0,5)], // finde the func description of the eep
+							eepType      : app.eepDesc[data.eep]   // find the Type description of the eep
+						} )
+					} else {
+						// we are not in teach in mode, but this is a "tech in" telegram
+						if(data.choice !== "f6" ) {
+							// "RPS" telegrams do not have a lernBit. depending on the Data Byte sometimes the Bit used for indicating "teach-in"-telegrams is set
+							// prevent false positives
+							app.emitters.forEach( function( emitter ) {
+								emitter.emit( "unknown-teach-in" , data ) // tell everyone we received an unknown "teach-in"
+							} )
+						}
+					}
 				} else {
-					// we are not in teach in mode, but this is a "tech in" telegram
-					if(data.choice !== "f6" ) {
-					// "RPS" telegrams do not have a lernBit. depending on the Data Byte sometimes the Bit used for indicating "teach-in"-telegrams is set
-					// prevent false positives
-						app.emitters.forEach( function( emitter ) {
-							emitter.emit( "unknown-teach-in" , data ) // tell everyone we received an unknown "teach-in"
+					// we don't know the sender and the leranBit is not set
+					if( data.choice === "f6" && app.learnMode === "on" ) {
+						// but this is an "RPS" signal ( remeber RPS don't have learn bits ), and we are in teach in mode
+						// so treat every RPS received during teach in a a request to be tought in
+						// do so...
+						app.learn( {
+							id           : data.senderId,
+							eep          : "f6-02-03",
+							manufacturer : "unknown",
+							title        : "New RPS Switch",       // give it some name
+							desc         : "I'm a new sensor...",  // and some description
+							eepFunc      : app.eepDesc["f6-02"], // finde the func description of the eep
+							eepType      : app.eepDesc["f6-02-03"]   // find the Type description of the eep
+						} )
+					} else {
+						// we are not in learnMode and the sensor of this telegram is not known.
+						// neither is this a learn telegram.
+						app.emitters.forEach( function( emitter ){
+							emitter.emit( "unknown-data" , data ) // just tell everyone we received something, but we don't know what to do with it
 						} )
 					}
 				}
-			} else {
-				// we don't know the sender and the leranBit is not set
-				if( data.choice === "f6" && app.learnMode === "on" ) {
-					// but this is an "RPS" signal ( remeber RPS don't have learn bits ), and we are in teach in mode
-					// so treat every RPS received during teach in a a request to be tought in
-					// do so...
-					app.learn( {
-						id           : data.senderId,
-						eep          : "f6-02-03",
-						manufacturer : "unknown",
-						title        : "New RPS Switch",       // give it some name
-						desc         : "I'm a new sensor...",  // and some description
-						eepFunc      : app.eepDesc["f6-02"], // finde the func description of the eep
-						eepType      : app.eepDesc["f6-02-03"]   // find the Type description of the eep
-					} )
-				} else {
-					// we are not in learnMode and the sensor of this telegram is not known.
-					// neither is this a learn telegram.
-					app.emitters.forEach( function( emitter ){
-						emitter.emit( "unknown-data" , data ) // just tell everyone we received something, but we don't know what to do with it
-					} )
-				}
 			}
-		}
+		});
 	})
 
 	app.startLearning = function( ) {
@@ -183,64 +195,62 @@ module.exports     = function(app,config){
 		// this function can be call from anywhwere.
 		// the sensor object should have the following fileds: id,eep,manufacturer,title,desc
 		// this can be used to update sensor info like desc and title...
-		knownSensors[ sensor.id ] = sensor // save the sensor under its id
-		app.learnMode = "off" // stop the learnMode in any case
-		clearTimeout(this.timerId)
-		app.emitters.forEach( function( emitter ) {
-      		emitter.emit( "learn-mode-stop" , { code : 0 , reason : "success" } ) // tell everyone we are not in learn mode anymore
-		} )
-		fs.writeFile( outFile , JSON.stringify( knownSensors , null , 4 ) , function( err ) {
-			// and actually save it to disc
-    		if( err ) {
+
+		var sensor_db = new EnoceanSensor(sensor); //the object is a proper json
+		sensor_db.save(function (err, user) {
+			app.learnMode = "off" // stop the learnMode in any case
+			clearTimeout(this.timerId)
+			app.emitters.forEach( function( emitter ) {
+				emitter.emit( "learn-mode-stop" , { code : 0 , reason : "success" } ) // tell everyone we are not in learn mode anymore
+			} )
+
+			if(err === undefined) {
+				// the file was successfully saved
 				app.emitters.forEach( function( emitter ) {
-      				emitter.emit( "learn-error" , { err : err, reason: "error saving sensor file to disk" } ) // there was an error saving the file
-				} )
-    		} else {
-    			// the file was successfully saved
-    			app.emitters.forEach( function( emitter ) {
 					emitter.emit( "learned" , sensor ) // let's tell everyone we where successfull attach the sensor info of the sensor we just saved
-				} )
-   			 }
-		})
+				});
+			}else{
+				app.emitters.forEach( function( emitter ) {
+					emitter.emit( "learn-error" , { err : err, reason: "error saving sensor file to disk" } ) // there was an error saving the file
+				});
+			}
+
+		});
 	}
 
 	app.forget = function( id ) {
-		// actuall delete a sensor by its id
-		var tmp = ""
-		if( knownSensors.hasOwnProperty( id ) ) {
-			tmp = knownSensors[ id ] // but befor we delete it, save the snsor info in a temporary variable
-			delete knownSensors[ id ] // delete the sensor from the knownSensor object (in memory)
-		}
-		app.forgetMode="off" // stop forget Mode
-		clearTimeout(this.timerId)
-		app.emitters.forEach( function( emitter ) {
-			emitter.emit( "forget-mode-stop" , { code : 0 , reason:"success"} ) // and tell the "world" we stoped forget mode
-		} )
-		fs.writeFile( outFile , JSON.stringify( knownSensors, null, 4), function( err ) {
-			// actually save the changes to disk
-    		if(err) {
-      			app.emitters.forEach( function( emitter ) {
-      				emitter.emit( "forget-error" , { err : err, reason: "error saving sensor file to disk" } ) // there was an error saving the file
-				} )
-    		} else {
+		EnoceanSensor.findOneAndRemove({ id: data.senderId }, function (err, sensor) {
+			app.forgetMode="off" // stop forget Mode
+			clearTimeout(this.timerId);
+			app.emitters.forEach( function( emitter ) {
+				emitter.emit( "forget-mode-stop" , { code : 0 , reason:"success"} ) // and tell the "world" we stoped forget mode
+			});
+
+
+			if( err === undefined) {
 				app.emitters.forEach(function(emitter){
 					emitter.emit("forgotten",tmp) // let's tell everyone we where successfull, attach the sensor info of the just deleted sensor
-				})
-   			 }
-		} )
+				});
+			} else {
+				app.emitters.forEach( function( emitter ) {
+					emitter.emit( "forget-error" , { err : err, reason: "error saving sensor file to disk" } ) // there was an error saving the file
+				});
+			}
+		});
 	}
 
-	app.info = function ( id ) {
-		// get info of a specific sensor
-		var sensor = knownSensors[ id ]
-		return sensor
+	app.info = function ( id, callback) {
+		EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
+			callback(sensor);
+		});
 	}
 	app.getLastValues = function(id){
 		return getLastData(id)
 	}
-	app.getSensors = function( ) {
-		// return all known sensors
-		return knownSensors
+	app.getSensors = function(callback) {
+		EnoceanSensor.find({}, function(err, sensors) {
+			callback(sensors);
+		});
 	}
 }
 

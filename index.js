@@ -218,16 +218,21 @@ function SerialPortListener( config ) {
 		socket.on( "learn" , this.learn ) // manualy learn/save/update a sensor description. expects a sensor description
 		socket.on( "forget" ,this.forget ) // deletes a sensor
 		socket.on( "get-all-sensors" , function( ) {
-			socket.emit("all-sensors", this.getSensors( ) ) // returns a list of all known sensors to this one socket
+			this.getSensors(function(sensors) {
+				socket.emit("all-sensors", sensors ) // returns a list of all known sensors to this one socket
+			})
 		}.bind( this ) )
 		socket.on( "get-sensor-info" , function( id ) {
-			socket.emit("sensors-info", this.info( id ) ) // returns info for one single sensor
+			this.info(id, function(sensor) {
+				socket.emit("sensors-info", sensor ) // returns info for one single sensor
+			})
 		}.bind( this) )
 		socket.on( "get-last-sensor-value" , function( id ) {
-			this.getLastValues(id)
+			socket.emit("last-sensors-value", {err:"todo"}) // returns info for one single sensor
+			/*this.getLastValues(id)
 			.then(function(value) {
 				socket.emit("last-sensors-value", value) // returns info for one single sensor
-			});
+			});*/
 		}.bind( this) )
 		//socket.on( "get-last-sensor-value" , async function( id ) {
 		//	socket.emit("last-sensors-value", await this.getLastValues( id ) ) // returns info for one single sensor
