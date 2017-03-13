@@ -214,7 +214,7 @@ function SerialPortListener( config ) {
 		// rergister for event emitters.
 		// we are lsitening for the following events:
 		socket.on("get-learning-state", function() {
-			socket.emit("learning-state", self.mem.learnMode ) // returns info for one single sensor
+			socket.emit("learning-state", self.learnMode ) // returns info for one single sensor
 		});
 		socket.on( "start-learning" , this.startLearning ) // start learn mode
 		socket.on( "start-forgetting" , this.startForgetting ) // start forget mode
