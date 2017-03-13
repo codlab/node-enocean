@@ -25,6 +25,13 @@ var db = undefined;
 var EnoceanSensor = undefined;
 
 
+function getEEP(rorg, rorg_func, rorg_type) {
+	return (rorg+"-"+rorg_func+"-"+rorg_type).toLowerCase();
+}
+
+function getByte(telegram_byte_str, index) {
+	return telegram_byte_str[index * 2 ] + telegram_byte_str[index * 2 + 1];
+}
 
 module.exports     = function(app,config){
 	this.timerId=null
@@ -143,9 +150,20 @@ module.exports     = function(app,config){
 					} else {
 						// we are not in learnMode and the sensor of this telegram is not known.
 						// neither is this a learn telegram.
-						app.emitters.forEach( function( emitter ){
-							emitter.emit( "unknown-data" , data ) // just tell everyone we received something, but we don't know what to do with it
-						} )
+						//retrieve eep to be sure about the device
+						var rorg =  getByte(data.rawByte, 6);
+						var rorg_func = getByte(data.rawByte, 6 + 6);
+						var rorg_type = getByte(data.rawByte, 6 + 7);
+						var eep = getEEP(rorg, rorg_func, rorg_type);
+
+						var format = app.getData(eep, data.raw);
+						if(format == undefined || (format.length == 0 && format[0].type == "unknown")) {
+							app.emitters.forEach( function( emitter ){
+								emitter.emit( "unknown-data" , data ) // just tell everyone we received something, but we don't know what to do with it
+							} )
+						}else{
+							console.log("no device found but eep seems correct, no need", eep);
+						}
 					}
 				}
 			}
