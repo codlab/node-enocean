@@ -21,7 +21,6 @@ module.exports=function(eep,data){
 	if(eep==="a5-07-01"){
 		ret = [{
 			type:"pir_status",
-			unit:"",
 			value: pir
 		},
 		{
