@@ -31,8 +31,12 @@ function SerialPortListener( config ) {
 
 	this.mem    = new Memory( this ); // initialize the Memory implementation used for learning an forgetting sensors. all meaningfull events are emitted there
 
-	var configFile      = require(this.configFilePath) // load the config file
-	this.base           = configFile.base // load the base address stored in the config file. It should be initialized with "00000000"
+	try{
+		var configFile      = require(this.configFilePath) // load the config file
+		this.base           = configFile.base // load the base address stored in the config file. It should be initialized with "00000000"
+	}catch(e) {
+		this.base = "00000000";
+	}
 
 	var serialPort      = null // pointer to the serialport object
 	var tmp             = null // tmp hold parts of uncomplete telegrams
@@ -96,24 +100,24 @@ function SerialPortListener( config ) {
 			emitter.emit( "data" , telegram ) // tell everyone we've got a telegram
 		} )
 		if( telegram.packetType == 2 ) {
-		// handle getting the base address. if we request request the base address from our device, it response with a telegram of type 2
-		// the telegram implemetation has already extracted the address.
+			// handle getting the base address. if we request request the base address from our device, it response with a telegram of type 2
+			// the telegram implemetation has already extracted the address.
 			if( telegram.hasOwnProperty( "base" ) ) { // if this Response holds our base address
 				this.base       = telegram.base // make it globaly available
 				configFile.base = telegram.base // write to the config file
 				fs.writeFile( this.configFilePath , JSON.stringify( configFile , null , 4 ), function( err ) {
-    				if(err) {
-    					// error saving config file
-    				} else {
-    					// when the file was successfully saved
-    					state = "ready" // part of the get Base Hack
-    					this.emitters.forEach( function( emitter ) {
-    						// emit the ready event. when we start listening and we dont know the base address, the ready event is not fired. so do it here.
-    						// but remember that every call to getBase also emits "ready"
+					if(err) {
+						// error saving config file
+					} else {
+						// when the file was successfully saved
+						state = "ready" // part of the get Base Hack
+						this.emitters.forEach( function( emitter ) {
+							// emit the ready event. when we start listening and we dont know the base address, the ready event is not fired. so do it here.
+							// but remember that every call to getBase also emits "ready"
 							emitter.emit( "ready" )
-    						emitter.emit( "base" , telegram.base ) // also fire the base event to everyone. also propagete the base address
+							emitter.emit( "base" , telegram.base ) // also fire the base event to everyone. also propagete the base address
 						} )
-   			 		}
+					}
 				}.bind( this ) ) // bind "this" to the enocean object
 			}
 			this.emitters.forEach( function( emitter ) {
@@ -139,26 +143,26 @@ function SerialPortListener( config ) {
 		}
 	}
 	this.sendAsync = function( msg ) {
-			// very simple send implemetation. expects a string (hex)
-			var p = new Promise(function(resolve,reject){
-				try{
-					var buf1 = new Buffer( msg , "hex" ) // turn msg into a Buffer
-					serialPort.write( buf1 , function(err){
-							if(err){reject(err)}else{resolve()}
-					}) // write it to the serial port
-					this.emitters.forEach( function( emitter ) {
-						emitter.emit( "sent" , msg ) // emit a sent event when we where able to sen something. does not mean the sending itself was successful though
-					} )
-				}catch(err){
-					this.emitters.forEach( function( emitter ) {
-						emitter.emit( "sent-error" , { err : err , msg : msg } ) // emit en error whe somthing went wrong
-					} )
-				}
+		// very simple send implemetation. expects a string (hex)
+		var p = new Promise(function(resolve,reject){
+			try{
+				var buf1 = new Buffer( msg , "hex" ) // turn msg into a Buffer
+				serialPort.write( buf1 , function(err){
+					if(err){reject(err)}else{resolve()}
+				}) // write it to the serial port
+				this.emitters.forEach( function( emitter ) {
+					emitter.emit( "sent" , msg ) // emit a sent event when we where able to sen something. does not mean the sending itself was successful though
+				} )
+			}catch(err){
+				this.emitters.forEach( function( emitter ) {
+					emitter.emit( "sent-error" , { err : err , msg : msg } ) // emit en error whe somthing went wrong
+				} )
+			}
 
-			}.bind(this))
-			return p
+		}.bind(this))
+		return p
 
-		}
+	}
 	this.getBase = function(){
 		// code to get the base address ( 55 0001 00 05 70 08 38 )
 		// 55   = startbyte
@@ -185,11 +189,11 @@ function SerialPortListener( config ) {
 		// data is the data part of a telegram as a string
 		var ret = null // set return to null
 		for( var i = 0 ; i < this.eepResolvers.length ; i++ ) { // loop through all eepResolvers
-			 ret = this.eepResolvers[i]( eep , data ) // try to decode the data
-			 if( ret !== null ) {
-			 	return ret // if a resolver returns somthing other than null, we have an answer. return it and be done
-			 	// if not try next.
-			 }
+			ret = this.eepResolvers[i]( eep , data ) // try to decode the data
+			if( ret !== null ) {
+				return ret // if a resolver returns somthing other than null, we have an answer. return it and be done
+				// if not try next.
+			}
 		}
 		// we obviuosly dont have an implementation for this eep yet. return an unknown value
 		return [ {
@@ -201,8 +205,8 @@ function SerialPortListener( config ) {
 
 	// a helper function
 	this.pad = function ( num , size ) { // fill a string with leading zeros up to size
-	    var s = "00000000000000000000000000000000" + num // maximum number of zero we need
-	    return s.substr( s.length - size ) // cut to size
+		var s = "00000000000000000000000000000000" + num // maximum number of zero we need
+		return s.substr( s.length - size ) // cut to size
 	}
 
 	this.register = function( socket ) {
@@ -229,18 +233,18 @@ function SerialPortListener( config ) {
 			socket.emit("last-sensors-value", {err:"todo"}) // returns info for one single sensor
 			/*this.getLastValues(id)
 			.then(function(value) {
-				socket.emit("last-sensors-value", value) // returns info for one single sensor
-			});*/
-		}.bind( this) )
-		//socket.on( "get-last-sensor-value" , async function( id ) {
-		//	socket.emit("last-sensors-value", await this.getLastValues( id ) ) // returns info for one single sensor
-		//}.bind( this) )
-	}
+			socket.emit("last-sensors-value", value) // returns info for one single sensor
+		});*/
+	}.bind( this) )
+	//socket.on( "get-last-sensor-value" , async function( id ) {
+	//	socket.emit("last-sensors-value", await this.getLastValues( id ) ) // returns info for one single sensor
+	//}.bind( this) )
+}
 }
 
 SerialPortListener.prototype.__proto__ = EventEmitter.prototype // inherit from EventEmitter
 
 module.exports = function( config ) {
 	if( config == undefined) config = {} //if called with no config, pass an empty one
-		return new SerialPortListener( config ) // return a constructor
-	}
+	return new SerialPortListener( config ) // return a constructor
+}
