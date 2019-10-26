@@ -71,7 +71,8 @@ module.exports     = function(app,config){
 	}
 
 	app.on( "data" , function( data ) {
-		EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
+		console.log("having data", data);
+		EnoceanSensor && EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
 			if( sensor != undefined) {
 				if( data.learnBit === 1 || data.choice === "f6" || data.choice === "d1") {
 					// but only if it is not a learn Telegram (learnBit==1)
@@ -220,6 +221,8 @@ module.exports     = function(app,config){
 		// the sensor object should have the following fileds: id,eep,manufacturer,title,desc
 		// this can be used to update sensor info like desc and title...
 
+		if(!EnoceanSensor) return;
+
 		var sensor_db = new EnoceanSensor(sensor); //the object is a proper json
 		sensor_db.save(function (err, user) {
 			app.learnMode = "off" // stop the learnMode in any case
@@ -243,7 +246,7 @@ module.exports     = function(app,config){
 	}
 
 	app.forget = function( id ) {
-		EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
+		EnoceanSensor && EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
 			app.forgetMode="off" // stop forget Mode
 			clearTimeout(this.timerId);
 			app.emitters.forEach( function( emitter ) {
@@ -264,6 +267,10 @@ module.exports     = function(app,config){
 	}
 
 	app.info = function ( id, callback) {
+		if(!EnoceanSensor) {
+			callback(undefined);
+			return;
+		}
 		EnoceanSensor.findOne({ id: id }, function (err, sensor) {
 			callback(sensor);
 		});
@@ -272,6 +279,10 @@ module.exports     = function(app,config){
 		return getLastData(id)
 	}
 	app.getSensors = function(callback) {
+		if(!EnoceanSensor) {
+			callback([]);
+			return;
+		}
 		EnoceanSensor.find({}, function(err, sensors) {
 			callback(sensors);
 		});
