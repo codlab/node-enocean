@@ -73,7 +73,7 @@ function SerialPortListener( config ) {
 				} )
 			}
 			serialPort.on( 'data' ,function( data ) {
-				if( data && data.isBuffer && data.isBuffer()) {
+				if( data && data.write) { //because Buffer
 					this.receive(data);
 				} else if(data && data.getRawBuffer) {
 					this.receive(data.getRawBuffer())
