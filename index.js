@@ -73,7 +73,13 @@ function SerialPortListener( config ) {
 				} )
 			}
 			serialPort.on( 'data' ,function( data ) {
-				this.receive(data.getRawBuffer())
+				if( data && data.isBuffer && data.isBuffer()) {
+					this.receive(data);
+				} else if(data && data.getRawBuffer) {
+					this.receive(data.getRawBuffer())
+				} else {
+					console.log("received invalid data", {data});
+				}
 			}.bind( this ) ) // bind "this" to the enocean object
 			serialPort.on("error", function (error) {
 				this.emitters.forEach(function(emitter) {
