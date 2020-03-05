@@ -56,13 +56,56 @@ function SerialPortListener( config ) {
 		serialPort.close( callback )
 	}
 
-	this.listen         = function(port){
+	this._buffer = undefined;
+	this.fillFrame = (buffer) => {
+		if(!this._buffer) this._buffer = Buffer.from(buffer);
+		else this._buffer = Buffer.concat([this._buffer, buffer]);
+	}
+
+	this.extractFrame = function() {
+		if(!this._buffer || this._buffer.length == 0) return undefined;
+
+		while(this._buffer.length > 0 && this._buffer[0] != 0x55) {
+			this._buffer = this._buffer.slice(0, 1);
+		}
+
+		if(!this._buffer || this._buffer.length == 0) return undefined;
+
+		//check we have header
+		if(this._buffer.length < 6) return undefined;
+
+		const length = this._buffer[1] * 16 + this._buffer[2] + this._buffer[3];
+		const total_length = 6 + length + 1;
+		if(this._buffer.length < total_length) return undefined;
+
+		const header = this._buffer.subarray(1, 1 + 4);
+		const data_and_optional = this._buffer.subarray(6, 6 + length);
+
+		const crc_in_header = this._buffer[5];
+		const crc_in_data_and_optional = this._buffer[total_length-1];
+		const crc_header = this.crc(header);
+		const crc_data_and_optional = this.crc(data_and_optional);
+
+		if(crc_in_header != crc_header || crc_in_data_and_optional != crc_data_and_optional) {
+			console.log("invalid crc", this.buffer);
+			this._buffer = undefined;
+			return undefined;
+		}
+
+		const telegram = this._buffer.subarray(0, total_length);
+		if(this._buffer.length > total_length) {
+			this._buffer = this._buffer.slice(total_length);
+		}
+		return telegram;
+	}
+
+	this.listen         = (port) => {
 		// open the serial port
 		// use /dev/ttyUSBx for USB Sticks
 		// use /dev/ttyAMA0 for enocean pi
 		// use /dev/COM1 for USB Sticks on Windows
 		serialPort      = new SerialPort( port , { baudRate: 57600 , parser: parser } )
-		serialPort.on( "open" , function( ) {
+		serialPort.on( "open" , ( ) => {
 			// when the serial port successfully opend
 			if( configFile.base === "00000000" || !configFile.hasOwnProperty( "base" ) ) { // if we dont know the base address yet
 				this.getBase( ) // get the base address from the attached device
@@ -72,31 +115,27 @@ function SerialPortListener( config ) {
 					emitter.emit( "ready" ) // emit the ready event. we are now ready to receive and send telegrams
 				} )
 			}
-			serialPort.on( 'data' ,function( data ) {
+			serialPort.on( 'data' , ( data ) => {
 				if( data && data.write) { //because Buffer
-					this.receive(data);
+					this.fillFrame(data);
+
+					const telegram = this.extractFrame();
+					if(telegram) {
+						this.receive(telegram);
+					} else {
+						console.log("invalid, waiting for more data ...");
+					}
 				} else if(data && data.getRawBuffer) {
 					this.receive(data.getRawBuffer())
 				} else {
 					console.log("received invalid data", {data});
 				}
-			}.bind( this ) ) // bind "this" to the enocean object
-			serialPort.on("error", function (error) {
-				this.emitters.forEach(function(emitter) {
-					emitter.emit("error", error)
-				});
-			}.bind(this));
-			serialPort.on("disconnect", function (error) {
-				this.emitters.forEach(function(emitter) {
-					emitter.emit("disconnect", error)
-				});
-			}.bind(this));
-			serialPort.on("close", function () {
-				this.emitters.forEach(function(emitter) {
-					emitter.emit("close")
-				});
-			}.bind(this));
-		}.bind( this ) ) // bind "this" to the enocean objec
+			});
+
+			serialPort.on("error", (error) => this.emitters.forEach(emitter=> emitter.emit("error", error)) );
+			serialPort.on("disconnect", (error) => this.emitters.forEach(emitter => emitter.emit("disconnect", error)) );
+			serialPort.on("close", () => this.emitters.forEach(emitter => emitter.emit("close")) );
+		}) // bind "this" to the enocean objec
 	}
 
 	this.receive     = function( buf ) {
