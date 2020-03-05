@@ -61,7 +61,7 @@ function SerialPortListener( config ) {
 		// use /dev/ttyUSBx for USB Sticks
 		// use /dev/ttyAMA0 for enocean pi
 		// use /dev/COM1 for USB Sticks on Windows
-		serialPort      = new SerialPort( port , { baudrate: 57600 , parser: parser } )
+		serialPort      = new SerialPort( port , { baudRate: 57600 , parser: parser } )
 		serialPort.on( "open" , function( ) {
 			// when the serial port successfully opend
 			if( configFile.base === "00000000" || !configFile.hasOwnProperty( "base" ) ) { // if we dont know the base address yet
