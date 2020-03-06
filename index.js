@@ -119,7 +119,7 @@ function SerialPortListener( config ) {
 				if( data && data.write) { //because Buffer
 					this.fillFrame(data);
 
-					const telegram = undefined;
+					var telegram = undefined;
 					
 					do {
 						telegram = this.extractFrame();
