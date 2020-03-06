@@ -93,7 +93,7 @@ function SerialPortListener( config ) {
 		}
 
 		const telegram = this._buffer.subarray(0, total_length);
-		if(this._buffer.length > total_length) {
+		if(this._buffer.length >= total_length) {
 			this._buffer = this._buffer.slice(total_length);
 		}
 		return telegram;
@@ -119,12 +119,17 @@ function SerialPortListener( config ) {
 				if( data && data.write) { //because Buffer
 					this.fillFrame(data);
 
-					const telegram = this.extractFrame();
-					if(telegram) {
-						this.receive(telegram);
-					} else {
-						console.log("invalid, waiting for more data ...");
-					}
+					const telegram = undefined;
+					
+					do {
+						telegram = this.extractFrame();
+						if(telegram) {
+							this.receive(telegram);
+						} else {
+							console.log("invalid, waiting for more data ...");
+						}
+					} while(telegram);
+
 				} else if(data && data.getRawBuffer) {
 					this.receive(data.getRawBuffer())
 				} else {
