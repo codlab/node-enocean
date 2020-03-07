@@ -58,6 +58,7 @@ function SerialPortListener( config ) {
 
 	this._buffer = undefined;
 	this.fillFrame = (buffer) => {
+		if(!buffer) return;
 		if(!this._buffer) this._buffer = Buffer.from(buffer);
 		else this._buffer = Buffer.concat([this._buffer, buffer]);
 	}
@@ -87,7 +88,7 @@ function SerialPortListener( config ) {
 		const crc_data_and_optional = this.crc(data_and_optional);
 
 		if(crc_in_header != crc_header || crc_in_data_and_optional != crc_data_and_optional) {
-			console.log("invalid crc", this.buffer);
+			console.log("invalid crc", this._buffer);
 			this._buffer = undefined;
 			return undefined;
 		}
