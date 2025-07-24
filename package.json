@@ -1,6 +1,6 @@
 {
   "name": "node-enocean-ts",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Typescript full implementation of the enocean protocol (ESP3 + EEP2.6)",
   "main": "build/index.js",
   "engines": {
