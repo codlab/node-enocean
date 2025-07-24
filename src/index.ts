@@ -23,12 +23,12 @@ import crcFunction from "./modules/crc"
 import Memory from "./modules/memory"
 // eepDesc is an Array with Description of all eeps and eep funcs used to look up description (in plain english)
 import eepDesc from "./modules/eepDesc"
-var parser = require("serialport-enocean-parser")
+const EnoceanParser = require("serialport-enocean-parser")
 // the eepResolvers used to extract data from known sensors. you can push your own handlers here
 import EepResolvers from "./modules/eep"
 
 export default class SerialPortListener extends EventEmitter {
-	private memory = new Memory()
+	// private memory = new Memory()
 	eepResolvers = EepResolvers;
 	private timeout: number;
 	private configFilePath: string;
@@ -42,6 +42,8 @@ export default class SerialPortListener extends EventEmitter {
 	private state: string|undefined; //part of the getBase Hack. Sometimes the call to get base does not return a response. state is used to repeat the process until we have a base address
 	
 	crc = crcFunction;
+
+	private parser = new EnoceanParser();
 
 	constructor(private config: any = {}) {
 		super();
@@ -67,9 +69,9 @@ export default class SerialPortListener extends EventEmitter {
 	}
 
 
-	info(id, callback) {
-		this.memory(id, callback);
-	}
+	//info(id, callback) {
+	//	this.memory(id, callback);
+	//}
 
 	// used to close the serial port. usefull for CLI inerfaces or tests
 	close(callback?: ErrorCallback) {
@@ -130,9 +132,7 @@ export default class SerialPortListener extends EventEmitter {
 		// use /dev/ttyAMA0 for enocean pi
 		// use /dev/COM1 for USB Sticks on Windows
 		const serialPort = this.serialPort = new SerialPort({ path: port, baudRate: 57600});
-
-		serialPort.pipe(parser)
-
+		serialPort.pipe(this.parser);
 		serialPort.on("open", () => {
 			// when the serial port successfully opend
 			if (this.configFile.base === "00000000" || !this.configFile.hasOwnProperty( "base" ) ) { // if we dont know the base address yet

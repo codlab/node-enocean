@@ -227,6 +227,7 @@ export default class Memory {
 
 		if(!EnoceanSensor) return;
 
+		/*
 		var sensor_db = new EnoceanSensor(sensor); //the object is a proper json
 		sensor_db.save(function (err, user) {
 			app.learnMode = "off" // stop the learnMode in any case
@@ -247,9 +248,11 @@ export default class Memory {
 			}
 
 		});
+		*/
 	}
 
 	forget( id ) {
+		/*
 		EnoceanSensor && EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
 			app.forgetMode="off" // stop forget Mode
 			clearTimeout(this.timerId);
@@ -268,16 +271,18 @@ export default class Memory {
 				});
 			}
 		});
+		*/
 	}
 
 	info( id, callback) {
-		if(!EnoceanSensor) {
+		callback(undefined);
+		/*if(!EnoceanSensor) {
 			callback(undefined);
 			return;
 		}
 		EnoceanSensor.findOne({ id: id }, function (err, sensor) {
 			callback(sensor);
-		});
+		});*/
 	}
 	
 	getLastValues(id){
@@ -285,20 +290,22 @@ export default class Memory {
 	}
 	
 	getSensors(callback) {
-		if(!EnoceanSensor) {
+		callback([]);
+		/*if(!EnoceanSensor) {
 			callback([]);
 			return;
 		}
 		EnoceanSensor.find({}, function(err, sensors) {
 			callback(sensors);
-		});
+		});*/
 	}
 }
 
 function getLastData(id){
 	return new Promise(function(resolve,reject){
-		db.get(id,function(err,value){
-			if(err){reject(err)}else{resolve(value)}
-		})
+		reject("no data");
+		//db.get(id,function(err,value){
+		//	if(err){reject(err)}else{resolve(value)}
+		//})
 	})
 }
