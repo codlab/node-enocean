@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "serialport": "13.0.0",
-    "serialport-enocean-parser": "0.2.0",
+    "serialport-enocean-parser": "git://github.com/codlab/node-serialport-enocean-parser.git#bf4121bad52c4fb239fd49af1f1d47393cd38b17",
     "uuid": "^3.0.1"
   },
   "resolutions": {
