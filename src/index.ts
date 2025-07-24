@@ -69,6 +69,54 @@ export default class SerialPortListener extends EventEmitter {
 		this.serialPort?.close(callback)
 	}
 
+	private _buffer: Buffer|undefined = undefined;
+
+	private fillFrame(buffer: any) {
+		if(!buffer) return;
+		if(!this._buffer) this._buffer = Buffer.from(buffer);
+		else this._buffer = Buffer.concat([this._buffer, buffer]);
+	}
+	
+	private extractFrame() {
+		if(!this._buffer || this._buffer.length == 0) return undefined;
+
+		while(this._buffer.length > 0 && this._buffer[0] != 0x55) {
+			this._buffer = this._buffer.slice(0, 1);
+		}
+
+		if(!this._buffer || this._buffer.length == 0) return undefined;
+
+		//check we have header
+		if(this._buffer.length < 6) return undefined;
+
+		const length = this._buffer[1] * 16 + this._buffer[2] + this._buffer[3];
+		const total_length = 6 + length + 1;
+		if(this._buffer.length < total_length) return undefined;
+
+		const header = this._buffer.subarray(1, 1 + 4);
+		const data_and_optional = this._buffer.subarray(6, 6 + length);
+
+		const crc_in_header = this._buffer[5];
+		const crc_in_data_and_optional = this._buffer[total_length-1];
+		const crc_header = this.crc(header);
+		const crc_data_and_optional = this.crc(data_and_optional);
+
+		if(crc_in_header != crc_header || crc_in_data_and_optional != crc_data_and_optional) {
+			console.log("invalid crc", this._buffer);
+			this._buffer = undefined;
+			return undefined;
+		}
+
+		const telegram = this._buffer.subarray(0, total_length);
+		if(this._buffer.length >= total_length) {
+			this._buffer = this._buffer.slice(total_length);
+		} else {
+			console.log("invalid lengths, resetting");
+			this._buffer = undefined;
+		}
+		return telegram;
+	}
+
 	listen(port: string) {
 		// open the serial port
 		// use /dev/ttyUSBx for USB Sticks
@@ -88,7 +136,23 @@ export default class SerialPortListener extends EventEmitter {
 				// emit the ready event. we are now ready to receive and send telegrams
 				this.emitters.forEach(emitter => emitter.emit("ready"));
 			}
-			serialPort.on('data', (data) => this.receive(data.getRawBuffer()));
+			serialPort.on('data', (data) => {
+				this.fillFrame(data);
+
+				var telegram: Buffer|undefined = undefined;
+				var hack = 0;
+
+				do {
+					telegram = this.extractFrame();
+					if(telegram) {
+						this.receive(telegram);
+					} else {
+						console.log("invalid, waiting for more data ...");
+					}
+
+					hack++;
+				} while(telegram && hack < 255);
+			});
 			serialPort.on("error", (error) => {
 				this.emitters.forEach(emitter => emitter.emit("error", error));
 			});
