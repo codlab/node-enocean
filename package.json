@@ -34,7 +34,7 @@
     "package.json",
     "build/",
     "README.md",
-    "LICENSE",
+    "LICENSE"
   ],
   "devDependencies": {
     "@types/events": "^3.0.3",
