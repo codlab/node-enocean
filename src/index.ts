@@ -20,20 +20,22 @@ import { ErrorCallback } from "@serialport/stream";
 
 import Telegram from "./modules/telegram"
 import crcFunction from "./modules/crc"
-// var Memory       = require( "./modules/memory.js" )
+import Memory from "./modules/memory"
 // eepDesc is an Array with Description of all eeps and eep funcs used to look up description (in plain english)
 import eepDesc from "./modules/eepDesc"
 var parser = require("serialport-enocean-parser")
 // the eepResolvers used to extract data from known sensors. you can push your own handlers here
-var eepResolvers: any[] = require("./modules/eep.js")
+import EepResolvers from "./modules/eep"
 
 export default class SerialPortListener extends EventEmitter {
+	private memory = new Memory()
+	eepResolvers = EepResolvers;
 	private timeout: number;
 	private configFilePath: string;
 	private base: string;
 	// an array of emmiter, all events emitted are emitted on all emitters. start with self, but you can push your own emitters here.
 	// for example: add a socket.io object to this array, to have all events automaticly forwarded to the browser.
-	private emitters: any[] = [];
+	emitters: any[] = [];
 	private configFile: any|undefined;
 
 	private serialPort: SerialPort|null = null;
@@ -62,6 +64,11 @@ export default class SerialPortListener extends EventEmitter {
 		} catch(e) {
 			this.base = "00000000";
 		}
+	}
+
+
+	info(id, callback) {
+		this.memory(id, callback);
 	}
 
 	// used to close the serial port. usefull for CLI inerfaces or tests

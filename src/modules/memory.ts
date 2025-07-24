@@ -31,14 +31,19 @@ function getByte(telegram_byte_str, index) {
 	return telegram_byte_str[index * 2 ] + telegram_byte_str[index * 2 + 1];
 }
 
-module.exports     = function(app,config){
-	this.timerId=null
+export default class Memory {
+	private timerId: NodeJS.Timeout|null = null
 
-	app.learnMode  = "on"
-	app.forgetMode = "off"
+	private learnMode  = "on"
+	private forgetMode = "off"
+	private timeout = 30
 
-	app.connect = function(mongo_path) {
-		mongoose.connect(mongo_path);
+	constructor(private emitters: any[]) {
+
+	}
+
+	connect(mongo_path) {
+		/*mongoose.connect(mongo_path);
 		db = mongoose.connection;
 
 		db.on("error", function(err) {
@@ -65,10 +70,10 @@ module.exports     = function(app,config){
 			});
 
 		});
-
+		*/
 	}
 
-	app.on( "data" , function( data ) {
+	/*app.on( "data" , function( data ) {
 		console.log("having data", data);
 		EnoceanSensor && EnoceanSensor.findOne({ id: data.senderId }, function (err, sensor) {
 			if( sensor != undefined) {
@@ -168,52 +173,53 @@ module.exports     = function(app,config){
 			}
 		});
 	})
+	*/
 
-	app.startLearning = function( ) {
+	startLearning( ) {
 		// start learnMode ("tech-in"-mode)
 		// the learn mode is here to automaticly learn sensors that send a teach in telegram
-		app.learnMode = "on"
-		app.emitters.forEach( function( emitter ) {
-			emitter.emit( "learn-mode-start" , { timeout : app.timeout } ) // propagete that we are ready to learn
+		this.learnMode = "on"
+		this.emitters.forEach( function( emitter ) {
+			emitter.emit( "learn-mode-start" , { timeout : this.timeout } ) // propagete that we are ready to learn
 		} )
-		this.timerId=setTimeout( app.stopLearning , app.timeout * 1000 ) // make sure we stop learning after timeout
+		this.timerId=setTimeout( () => this.stopLearning() , this.timeout * 1000 ) // make sure we stop learning after timeout
 	}
 
-	app.stopLearning       = function( ) {
+	stopLearning( ) {
 		// stop learnMode
-		if( app.learnMode == "on" ) {
+		if( this.learnMode == "on" ) {
 			// but only if we are still in leranMode
-			app.learnMode  =" off"
-			clearTimeout(this.timerId)
-			app.emitters.forEach( function( emitter ) {
+			this.learnMode  =" off"
+			this.timerId && clearTimeout(this.timerId)
+			this.emitters.forEach( function( emitter ) {
 				emitter.emit( "learn-mode-stop" , { code : 2 , reason : "timeout" } ) // tell everyone we are not in teach in anymore
 			} )
 		}
 	}
 
-	app.startForgetting = function( ) {
+	startForgetting( ) {
 		// start the forget mode
 		// this is used to delete single sensors, through its teach in telegram.
-		app.forgetMode  = "on"
-		app.emitters.forEach( function( emitter ) {
-			emitter.emit( "forget-mode-start" , { timeout : app.timeout } ) // tell everyone we are in forget-mode
+		this.forgetMode  = "on"
+		this.emitters.forEach( function( emitter ) {
+			emitter.emit( "forget-mode-start" , { timeout : this.timeout } ) // tell everyone we are in forget-mode
 		} )
-		this.timerId=setTimeout( app.stopForgetting , app.timeout * 1000 ) // make sure we leave stop mode after timeout
+		this.timerId=setTimeout( () => this.stopForgetting() , this.timeout * 1000 ) // make sure we leave stop mode after timeout
 	}
 
-	app.stopForgetting      = function( ) {
+	stopForgetting( ) {
 		// stop forget Mode
-		if( app.forgetMode == "on" ) {
+		if( this.forgetMode == "on" ) {
 			// but only if we are in forget Mode
-			app.forgetMode  = "off"
-			clearTimeout(this.timerId)
-			app.emitters.forEach( function( emitter ) {
+			this.forgetMode  = "off"
+			this.timerId && clearTimeout(this.timerId)
+			this.emitters.forEach( function( emitter ) {
 				emitter.emit( "forget-mode-stop" , { code : 2 , reason : "timeout" } ) // tell everyone we are not in forget mode anymore
 			} )
 		}
 	}
 
-	app.learn = function( sensor ) {
+	learn( sensor ) {
 		// actually learn a sensor.
 		// this function can be call from anywhwere.
 		// the sensor object should have the following fileds: id,eep,manufacturer,title,desc
@@ -243,7 +249,7 @@ module.exports     = function(app,config){
 		});
 	}
 
-	app.forget = function( id ) {
+	forget( id ) {
 		EnoceanSensor && EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
 			app.forgetMode="off" // stop forget Mode
 			clearTimeout(this.timerId);
@@ -264,7 +270,7 @@ module.exports     = function(app,config){
 		});
 	}
 
-	app.info = function ( id, callback) {
+	info( id, callback) {
 		if(!EnoceanSensor) {
 			callback(undefined);
 			return;
@@ -273,10 +279,12 @@ module.exports     = function(app,config){
 			callback(sensor);
 		});
 	}
-	app.getLastValues = function(id){
+	
+	getLastValues(id){
 		return getLastData(id)
 	}
-	app.getSensors = function(callback) {
+	
+	getSensors(callback) {
 		if(!EnoceanSensor) {
 			callback([]);
 			return;
