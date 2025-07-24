@@ -302,10 +302,10 @@ node-gyp-build@4.8.4:
   resolved "https://registry.npmjs.org/node-gyp-build/-/node-gyp-build-4.8.4.tgz"
   integrity sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==
 
-serialport-enocean-parser@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.npmjs.org/serialport-enocean-parser/-/serialport-enocean-parser-0.1.0.tgz"
-  integrity sha512-PHRzc6xBHfKNFIo8ILgvc+f6RlG8aTsWJ4LrxWeFPlKIFVxaNU9+svI4cX4Zoy9xfjOvLlGA2vyig/5qLXaPow==
+serialport-enocean-parser@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/serialport-enocean-parser/-/serialport-enocean-parser-0.2.0.tgz#83c9303f67bd5e0dfb4d5177da8b27028e5577c9"
+  integrity sha512-gwTugKsaOw66CBCaUFzkroQofwesN1IOqfRyxLNrldBXYXcnCCbawfPEEO/IvoAxOGRShy7I+vcn/9xB2FI0TA==
 
 serialport@13.0.0:
   version "13.0.0"
