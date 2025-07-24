@@ -19,8 +19,6 @@
 //     this module implements saving and deleting sensors as well as hanbling telegrams from known sensor
 //     this implementation uses the fiesystem to stor sensor info
 
-var mongoose = require("mongoose");
-
 var db = undefined;
 var EnoceanSensor = undefined;
 
