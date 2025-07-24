@@ -13,11 +13,9 @@
 //     You should have received a copy of the GNU General Public License
 //     along with node-enocean.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 //     # EnOcean ESP 3.0 implementation
 //     this module extracts basic info from telegrams which are passed here as a Buffer
-var M=[]
+const M: string[] = []
 M[0x000]="MANUFACTURER_RESERVED"
 M[0x001]="PEHA"
 M[0x002]="THERMOKON"
@@ -80,6 +78,7 @@ M[0x40]="JAEGER_DIREKT"
 M[0x41]="AIR_SYSTEM_COMPONENTS_INC"
 M[0x46]="NODON"
 M[0x7F]="MULTI_USER_MANUFACTURER"
+
 var Manufacturer_List = M
 // [ // the List of Manufacturers. the index is equal to the number transmitted in learn telegrams
 // 	'MANUFACTURER_RESERVED' ,'PEHA','THERMOKON','SERVODAN','ECHOFLEX_SOLUTIONS','OMNIO_AG','HARDMEIER_ELECTRONICS','REGULVAR_INC','AD_HOC_ELECTRONICS',
@@ -91,10 +90,29 @@ var Manufacturer_List = M
 // 	'GRUPPO_GIORDANO_IDEA_SPA','ALPHAEOS_AG','TAG_TECHNOLOGIES','CLOUD_BUILDINGS_LTD','GIGA_CONCEPT','SENSORTEC','JAEGER_DIREKT','AIR_SYSTEM_COMPONENTS_INC'
 // 	]
 
-module.exports = function enocean_Telegram( ) {
-	this.timestamp = Date.now()
-	this.loadFromBuffer    = function( buf ) {
-		this.raw					 = buf
+export default class Telegram {
+	timestamp = Date.now();
+	raw: Buffer|string;
+	rawByte: string;
+	packetType: number;
+	packetTypeString: string|undefined;
+	returnCode: number|undefined;
+	returnCodeString: string|undefined;
+	base: string;
+	senderId: string|undefined;
+	choice: string|undefined;
+	subTelNum: number|undefined;
+	destinationId: string|undefined;
+	rssi: number|undefined;
+	securityLevel: number|undefined;
+	learnBit: number|undefined;
+	manufacturerid: number|undefined;
+	eep: string|undefined;
+	manufacturer: string|undefined;
+
+	constructor(buf: Buffer) {
+		this.base = "";
+		this.raw  = buf
 		this.rawByte       = buf.toString( "hex" ) // store the original Buffer as a string in .rawByte
 		var dataLength     = 255 * buf[ 1 ] + buf[ 2 ] // length of the Data Part of the telegram
 		var optionalLength = buf[ 3 ] // length of the optional data part of the telegram
@@ -182,12 +200,12 @@ module.exports = function enocean_Telegram( ) {
 						this.raw               = pad(rawDataByte.toString("hex"),dataLength*2 )// extract the data byte (Byte0) as a padded hex string
 						this.learnBit          = 0
 						this.packetTypeString  = "UTE"
-						var type           = this.raw.substring(8,10)
-						var func           = this.raw.substring(10,12)
+						var typeStr           = this.raw.substring(8,10)
+						var funcStr           = this.raw.substring(10,12)
 						var choice          = this.raw.substring(12,14)
 						var MANUFACTURERID = parseInt(this.raw .substring(4,6),16)
 						this.manufacturerid=MANUFACTURERID
-						this.eep           = choice+"-" + pad( func , 2 ) + "-" + pad( type , 2 )
+						this.eep           = choice+"-" + pad( funcStr , 2 ) + "-" + pad( typeStr , 2 )
 						this.manufacturer  = Manufacturer_List[ MANUFACTURERID ]
 					break
 				}
@@ -196,7 +214,7 @@ module.exports = function enocean_Telegram( ) {
 	}
 }
 // a helper function repeated here, so this module does not require anything
-function pad( num , size ) { // fill a string with leading zeros up to size
+function pad(num: string, size: number ) { // fill a string with leading zeros up to size
     var s = "00000000000000000000000000000000" + num // maximum number of zero we need
     return s.substr( s.length - size ) // cut to size
 }

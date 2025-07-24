@@ -1,8 +1,8 @@
 {
-  "name": "node-enocean",
+  "name": "node-enocean-ts",
   "version": "2.0.1",
-  "description": "full implementation of the enocean protocol (ESP3 + EEP2.6)",
-  "main": "index.js",
+  "description": "Typescript full implementation of the enocean protocol (ESP3 + EEP2.6)",
+  "main": "build/index.js",
   "engines": {
     "node": ">=7.0.0"
   },
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Holger-Will/node-enocean.git"
+    "url": "https://github.com/codlab/node-enocean.git"
   },
   "keywords": [
     "enocean",
@@ -23,16 +23,26 @@
   "author": "Holger Will",
   "license": "ISC",
   "dependencies": {
-    "level": "^1.6.0",
-    "mongoose": "^4.8.7",
-    "serialport": "8.0.7",
+    "serialport": "13.0.0",
     "serialport-enocean-parser": "^0.1.0",
     "uuid": "^3.0.1"
   },
+  "resolutions": {
+    "fibers": "npm:empty-npm-package"
+  },
+  "files": [
+    "package.json",
+    "build/",
+    "README.md",
+    "LICENSE",
+  ],
   "devDependencies": {
+    "@types/events": "^3.0.3",
+    "@types/node": "^24.1.0",
     "chai": "^3.3.0",
     "mocha": "^2.3.3",
     "node-enocean-button": "^2.2.2",
-    "node-enocean-dimmer": "^2.2.1"
+    "node-enocean-dimmer": "^2.2.1",
+    "typescript": "^5.8.3"
   }
 }

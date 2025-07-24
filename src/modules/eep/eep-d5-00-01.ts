@@ -1,4 +1,4 @@
-module.exports=function(eep,data){
+export default function(eep,data){
 	var ret=null
 	var eepa=eep.split("-")
 	var choice=eepa[0]

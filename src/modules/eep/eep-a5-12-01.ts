@@ -1,6 +1,6 @@
-var Help = require("./eepHelper.js")
-module.exports=function(eep,data){
-	var ret=null
+import Help from "./eepHelper"
+
+export default function(eep,data){
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]
@@ -31,22 +31,22 @@ module.exports=function(eep,data){
 			devisor=Help.extractBitEnum(0,0,2,data,[1,10,100,1000])
 			value=parseInt(data.substring(0,6),16)/devisor
 		}
-		d1={
+		const d1={
 			type:"total_tarif_0",
 			unit:"kWh",
 			value: (T1==0 && Unit=="kWh")?value:null
 		}
-		d2={
+		const d2={
 			type:"current_tarif_0",
 			unit:"W",
 			value:(T1==0 && Unit=="W")?value:null
 		}
-		d3={
+		const d3={
 			type:"total_tarif_1",
 			unit:"kWh",
 			value:(T1==1 && Unit=="kWh")?value:null
 		}
-		d4={
+		const d4={
 			type:"current_tarif_1",
 			unit:"W",
 			value:(T1==1 && Unit=="W")?value:null

@@ -1,5 +1,5 @@
-var Help = require("./eepHelper.js")
-module.exports=function(eep,data){
+import Help from "./eepHelper"
+export default function(eep,data){
 	var ret=null
 	if(eep==="a5-10-06"){
 		var tmp=Help.extractByteValue(1,255,0,0,40,data)

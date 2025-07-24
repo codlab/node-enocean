@@ -1,13 +1,11 @@
-module.exports=function(eep,data){
-	var ret=null
+export default function(eep,data) {
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]
 	var type=eepa[2]
 	var typeNr=parseInt(type,16)
 	if(eep==="a5-11-02"){
-
-		rawVal = ((parseInt(data,16) & 0xff00)>>>8)
+		var rawVal = ((parseInt(data,16) & 0xff00)>>>8)
 		var Smin       = 0
 		var Smax       = 51.2
 		var val1    = ((Smax-Smin)/255)*(rawVal)+Smin
@@ -17,7 +15,7 @@ module.exports=function(eep,data){
 		var val2    = ((Smax-Smin)/255)*(rawVal)+Smin
 
 		var i = ((parseInt(data,16) & 0xff0000)>>>16)
-		var fanstages=[]
+		var fanstages: string[] =[]
 		fanstages[0]="Stage 0 Manual"
 		fanstages[1]="Stage 1 Manual"
 		fanstages[2]="Stage 2 Manual"
@@ -28,22 +26,22 @@ module.exports=function(eep,data){
 		fanstages[19]="Stage 3 Automatic"
 		fanstages[255]="Not Available"
 
-		i1=(parseInt(data,16) & 4)>>>2
-		NRG= ["Normal","Energy hold-off/Dew point"]
+		var i1=(parseInt(data,16) & 4)>>>2
+		var NRG= ["Normal","Energy hold-off/Dew point"]
 
-		i2=(parseInt(data,16) & 3)
-		occu= ["Occupied","Unoccupied","StandBy","Frost"]
+		var i2=(parseInt(data,16) & 3)
+		var occu= ["Occupied","Unoccupied","StandBy","Frost"]
 
-		i3=(parseInt(data,16) & 16)>>>4
-		CState= ["Automatic","Override"]
+		var i3=(parseInt(data,16) & 16)>>>4
+		var CState= ["Automatic","Override"]
 
-		i4=(parseInt(data,16) & 128)>>>7
-		Alarm= ["No alarm","Alarm"]
+		var i4=(parseInt(data,16) & 128)>>>7
+		var Alarm= ["No alarm","Alarm"]
 
-		i5=(parseInt(data,16) & 96)>>>6
-		mode= ["Heating","Cooling","Off"]
+		var i5=(parseInt(data,16) & 96)>>>6
+		var mode= ["Heating","Cooling","Off"]
 
-		ret=[{
+		return [{
 			type:"setpoint_temperature",
 			unit:"°C",
 			value: val1
@@ -76,7 +74,6 @@ module.exports=function(eep,data){
 			unit:"",
 			value: mode[i5]
 		}]
-		return ret
 	}
-	return ret
+	return null
 }

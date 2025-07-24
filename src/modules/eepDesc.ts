@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	"f6-02" : "Rocker Switch, 2 Rocker",
 		"f6-02-01" : "Light and Blind Control - Application Style 1",
 		"f6-02-02" : "Light and Blind Control - Application Style 1",

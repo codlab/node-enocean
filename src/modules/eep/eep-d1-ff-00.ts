@@ -1,5 +1,6 @@
-var Help = require("./eepHelper.js")
-module.exports=function(eep,data){
+import Help from "./eepHelper"
+
+export default function(eep,data){
 	var begin = eep.split("-");
 
 	//24 bytes of data

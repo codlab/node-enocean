@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	extractByteValue : function(ByteNr,minByte,maxByte,minValue,maxValue,data){
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
@@ -63,7 +63,7 @@ module.exports = {
 				rawVal = (rawByte & 0xff000000) >>> 24
 			break
 		}
-		finalValue = Math.pow(2,BitStart)
+		var finalValue = Math.pow(2,BitStart)
 		for(var i=1;i<BitLength;i++){
 			finalValue+=Math.pow(2,BitStart+i)
 		}
@@ -86,8 +86,8 @@ module.exports = {
 				rawVal = (rawByte & 0xff000000) >>> 24
 			break
 		}
-		finalValue = Math.pow(2,BitStart)
-		for(var i=1;i<BitLength;i++){
+		var finalValue = Math.pow(2,BitStart)
+		for(var i=1; i<BitLength; i++){
 			finalValue+=Math.pow(2,BitStart+i)
 		}
 		return ENUM[((rawByte & finalValue) >>> BitStart)]

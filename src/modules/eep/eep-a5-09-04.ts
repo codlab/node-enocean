@@ -1,6 +1,5 @@
-var Help = require("./eepHelper.js")
-module.exports=function(eep,data){
-	var ret=null
+import Help from "./eepHelper"
+export default function(eep,data){
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]
@@ -11,7 +10,7 @@ module.exports=function(eep,data){
 		var val2 = Help.extractByteValue(2,0,255,0,2550,data)
 		var val1 = Help.extractByteValue(1,0,255,0,51,data)
 
-		ret=[
+		return [
 			{
 				type:"humidity",
 				unit:"%",
@@ -26,7 +25,6 @@ module.exports=function(eep,data){
 				value: val1
 			}
 		]
-		return ret
 	}
 	return null
 }

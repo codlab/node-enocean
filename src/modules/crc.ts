@@ -48,10 +48,11 @@ var crcTable = [
 	0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3
 ];
 
-module.exports = function (buf){
+export default function (buf: Buffer){
 	var crc = 0;
-	for (var i = 0;i < buf.length;i++){
+	for (var i = 0;i < buf.length;i++) {
 		crc = crcTable[(crc ^ buf[i])];
 	}
+
 	return crc;
 }
