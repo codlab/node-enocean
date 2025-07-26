@@ -14,23 +14,24 @@
 //     along with node-enocean.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 //     # memory implementation.
 //     this module implements saving and deleting sensors as well as hanbling telegrams from known sensor
 //     this implementation uses the fiesystem to stor sensor info
 
-var db = undefined;
-var EnoceanSensor = undefined;
+// var db = undefined;
+// var EnoceanSensor = undefined;
 
+// function getEEP(rorg, rorg_func, rorg_type) {
+// 	return (rorg+"-"+rorg_func+"-"+rorg_type).toLowerCase();
+// }
 
-function getEEP(rorg, rorg_func, rorg_type) {
-	return (rorg+"-"+rorg_func+"-"+rorg_type).toLowerCase();
-}
+// function getByte(telegram_byte_str, index) {
+// 	return telegram_byte_str[index * 2 ] + telegram_byte_str[index * 2 + 1];
+// }
 
-function getByte(telegram_byte_str, index) {
-	return telegram_byte_str[index * 2 ] + telegram_byte_str[index * 2 + 1];
-}
-
+/**
+ * @deprecated for now
+ */
 export default class Memory {
 	private timerId: NodeJS.Timeout|null = null
 
@@ -42,7 +43,7 @@ export default class Memory {
 
 	}
 
-	connect(mongo_path) {
+	connect(mongo_path: string) {
 		/*mongoose.connect(mongo_path);
 		db = mongoose.connection;
 
@@ -175,7 +176,7 @@ export default class Memory {
 	})
 	*/
 
-	startLearning( ) {
+	/* startLearning( ) {
 		// start learnMode ("tech-in"-mode)
 		// the learn mode is here to automaticly learn sensors that send a teach in telegram
 		this.learnMode = "on"
@@ -183,9 +184,9 @@ export default class Memory {
 			emitter.emit( "learn-mode-start" , { timeout : this.timeout } ) // propagete that we are ready to learn
 		} )
 		this.timerId=setTimeout( () => this.stopLearning() , this.timeout * 1000 ) // make sure we stop learning after timeout
-	}
+	} */
 
-	stopLearning( ) {
+	/* stopLearning( ) {
 		// stop learnMode
 		if( this.learnMode == "on" ) {
 			// but only if we are still in leranMode
@@ -195,9 +196,9 @@ export default class Memory {
 				emitter.emit( "learn-mode-stop" , { code : 2 , reason : "timeout" } ) // tell everyone we are not in teach in anymore
 			} )
 		}
-	}
+	} */
 
-	startForgetting( ) {
+	/* startForgetting( ) {
 		// start the forget mode
 		// this is used to delete single sensors, through its teach in telegram.
 		this.forgetMode  = "on"
@@ -205,9 +206,9 @@ export default class Memory {
 			emitter.emit( "forget-mode-start" , { timeout : this.timeout } ) // tell everyone we are in forget-mode
 		} )
 		this.timerId=setTimeout( () => this.stopForgetting() , this.timeout * 1000 ) // make sure we leave stop mode after timeout
-	}
+	} */
 
-	stopForgetting( ) {
+	/*stopForgetting( ) {
 		// stop forget Mode
 		if( this.forgetMode == "on" ) {
 			// but only if we are in forget Mode
@@ -217,9 +218,9 @@ export default class Memory {
 				emitter.emit( "forget-mode-stop" , { code : 2 , reason : "timeout" } ) // tell everyone we are not in forget mode anymore
 			} )
 		}
-	}
+	}*/
 
-	learn( sensor ) {
+	/* learn( sensor ) {
 		// actually learn a sensor.
 		// this function can be call from anywhwere.
 		// the sensor object should have the following fileds: id,eep,manufacturer,title,desc
@@ -227,7 +228,6 @@ export default class Memory {
 
 		if(!EnoceanSensor) return;
 
-		/*
 		var sensor_db = new EnoceanSensor(sensor); //the object is a proper json
 		sensor_db.save(function (err, user) {
 			app.learnMode = "off" // stop the learnMode in any case
@@ -248,11 +248,9 @@ export default class Memory {
 			}
 
 		});
-		*/
-	}
+	} */
 
-	forget( id ) {
-		/*
+	/* forget( id ) {
 		EnoceanSensor && EnoceanSensor.findOneAndRemove({ id: id }, function (err, sensor) {
 			app.forgetMode="off" // stop forget Mode
 			clearTimeout(this.timerId);
@@ -271,41 +269,40 @@ export default class Memory {
 				});
 			}
 		});
-		*/
-	}
+	} */
 
-	info( id, callback) {
+	/* info( id, callback) {
 		callback(undefined);
-		/*if(!EnoceanSensor) {
+		if(!EnoceanSensor) {
 			callback(undefined);
 			return;
 		}
 		EnoceanSensor.findOne({ id: id }, function (err, sensor) {
 			callback(sensor);
-		});*/
-	}
+		});
+	} */
 	
-	getLastValues(id){
+	/* getLastValues(id){
 		return getLastData(id)
-	}
+	} */
 	
-	getSensors(callback) {
+	/* getSensors(callback) {
 		callback([]);
-		/*if(!EnoceanSensor) {
+		if(!EnoceanSensor) {
 			callback([]);
 			return;
 		}
 		EnoceanSensor.find({}, function(err, sensors) {
 			callback(sensors);
-		});*/
-	}
+		});
+	} */
 }
 
-function getLastData(id){
+/* function getLastData(id){
 	return new Promise(function(resolve,reject){
 		reject("no data");
 		//db.get(id,function(err,value){
 		//	if(err){reject(err)}else{resolve(value)}
 		//})
 	})
-}
+} */

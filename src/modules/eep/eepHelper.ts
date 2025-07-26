@@ -1,21 +1,22 @@
 export default {
-	extractByteValue : function(ByteNr,minByte,maxByte,minValue,maxValue,data){
+	extractByteValue : (ByteNr: number, minByte: number, maxByte: number, minValue: number, maxValue: number, data: string) => {
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
-		switch(ByteNr){
-			case 1 :
+
+		switch (ByteNr) {
+			case 1:
 				rawVal = (rawByte & 0xff00) >>> 8
 			break
-			case 2 :
+			case 2:
 				rawVal = (rawByte & 0xff0000) >>> 16
 			break
-			case 3 :
+			case 3:
 				rawVal = (rawByte & 0xff000000) >>> 24
 			break
 			}
-		return ((maxValue-minValue)/(maxByte-minByte))*(rawVal-minByte)+minValue
+		return ((maxValue - minValue) / (maxByte - minByte)) * (rawVal - minByte) + minValue
 	},
-	extract10BitValue : function(ByteBase,minByte,maxByte,minValue,maxValue,data){
+	extract10BitValue: (ByteBase: number, minByte: number, maxByte: number, minValue: number, maxValue: number, data: string) => {
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
 		switch(ByteBase){
@@ -28,7 +29,7 @@ export default {
 			}
 		return ((maxValue-minValue)/(maxByte-minByte))*(rawVal-minByte)+minValue
 	},
-	extract10BitValueReverse : function(ByteBase,minByte,maxByte,minValue,maxValue,data){
+	extract10BitValueReverse: (ByteBase: number, minByte: number, maxByte: number, minValue: number, maxValue: number, data: string) => {
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
 		switch(ByteBase){
@@ -46,7 +47,7 @@ export default {
 			}
 		return ((maxValue-minValue)/(maxByte-minByte))*(rawVal-minByte)+minValue
 	},
-	extractBitValue : function(ByteNr,BitStart,BitLength,data){
+	extractBitValue: (ByteNr: number, BitStart: number, BitLength: number, data: string) => {
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
 		switch(ByteNr){
@@ -69,7 +70,7 @@ export default {
 		}
 		return ((rawByte & finalValue) >>> BitStart)
 	},
-	extractBitEnum : function(ByteNr,BitStart,BitLength,data,ENUM){
+	extractBitEnum: (ByteNr: number, BitStart: number, BitLength: number, data: string, ENUM: any[]) => {
 		var rawVal  = 0
 		var rawByte = parseInt(data,16)
 		switch(ByteNr){

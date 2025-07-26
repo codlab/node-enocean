@@ -1,5 +1,6 @@
 import Help from "./eepHelper"
-export default function(eep,data){
+import { SensorTemperature } from "./Sensors"
+export default function(eep: string, data: string){
 	var ret=null
 	var eepa=eep.split("-")
 	var choice=eepa[0]
@@ -28,6 +29,6 @@ export default function(eep,data){
 	return ret
 }
 
-var sensors={
+var sensors: SensorTemperature = {
 	"03":{hmin:0,hmax:100,tmin:-20,tmax:60} //1
 }

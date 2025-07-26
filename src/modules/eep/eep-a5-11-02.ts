@@ -1,4 +1,4 @@
-export default function(eep,data) {
+export default function(eep: string, data: string) {
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]

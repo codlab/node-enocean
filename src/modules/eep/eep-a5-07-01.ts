@@ -1,36 +1,34 @@
 import Help from "./eepHelper"
-export default function(eep,data){
-	var ret=null
+
+export default function(eep: string, data: string) {
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]
 	var type=eepa[2]
 	var typeNr=parseInt(type,16)
-	rawVal = ((parseInt(data,16) & 0xff00)>>>8)
+	const rawVal = ((parseInt(data,16) & 0xff00)>>>8)
 	var pir = (rawVal < 128) ? "off" : "on"
 	var i = (parseInt(data,16) & 1)
 
-	val1=Help.extractByteValue(3,0,250,0,5,data)
-	vol={
+	const val1 = Help.extractByteValue(3,0,250,0,5,data)
+	const contact=["not supported","supported"]
+
+	if (eep !== "a5-07-01") return null;
+	const ret = [{
+		type:"pir_status",
+		value: pir
+	},
+	{
+		type:"supply_voltage",
+		unit:"",
+		value: contact[i]
+	}];
+	
+	if (i==1) ret.push({
 		type:"voltage",
 		unit:"V",
-		value: val1
-	}
-	var contact=["not supported","supported"]
-
-	if(eep==="a5-07-01"){
-		ret = [{
-			type:"pir_status",
-			value: pir
-		},
-		{
-			type:"supply_voltage",
-			unit:"",
-			value: contact[i]
-		}
-	]
-	if(i==1) ret.push(vol)
-	return ret
-}
-return ret
+		value: `${val1}`
+	})
+	
+	return ret;
 }

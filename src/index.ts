@@ -20,12 +20,14 @@ import { ErrorCallback } from "@serialport/stream";
 
 import Telegram from "./modules/telegram"
 import crcFunction from "./modules/crc"
-import Memory from "./modules/memory"
 // eepDesc is an Array with Description of all eeps and eep funcs used to look up description (in plain english)
 import eepDesc from "./modules/eepDesc"
-const EnoceanParser = require("serialport-enocean-parser")
+// removed the parser as it's unecessary for now
+// dep was     "serialport-enocean-parser": "git://github.com/codlab/node-serialport-enocean-parser.git#bf4121bad52c4fb239fd49af1f1d47393cd38b17",
+// const EnoceanParser = require("serialport-enocean-parser")
 // the eepResolvers used to extract data from known sensors. you can push your own handlers here
-import EepResolvers from "./modules/eep"
+import EepResolvers from "./modules/eep";
+
 
 export default class SerialPortListener extends EventEmitter {
 	// private memory = new Memory()
@@ -43,7 +45,7 @@ export default class SerialPortListener extends EventEmitter {
 	
 	crc = crcFunction;
 
-	private parser = new EnoceanParser();
+	//private parser = new EnoceanParser();
 
 	constructor(private config: any = {}) {
 		super();
@@ -132,7 +134,8 @@ export default class SerialPortListener extends EventEmitter {
 		// use /dev/ttyAMA0 for enocean pi
 		// use /dev/COM1 for USB Sticks on Windows
 		const serialPort = this.serialPort = new SerialPort({ path: port, baudRate: 57600});
-		serialPort.pipe(this.parser);
+		//serialPort.pipe(this.parser);
+		
 		serialPort.on("open", () => {
 			// when the serial port successfully opend
 			if (this.configFile.base === "00000000" || !this.configFile.hasOwnProperty( "base" ) ) { // if we dont know the base address yet
@@ -274,19 +277,15 @@ export default class SerialPortListener extends EventEmitter {
 		// eep is an eep as a string ( f.e. a5-03-02 )
 		// data is the data part of a telegram as a string
 		var ret = null // set return to null
-		for(var i = 0; i < eepResolvers.length; i++) { // loop through all eepResolvers
-			ret = eepResolvers[i](eep , data) // try to decode the data
-			if( ret !== null ) {
-				return ret // if a resolver returns somthing other than null, we have an answer. return it and be done
-				// if not try next.
-			}
-		}
-		// we obviuosly dont have an implementation for this eep yet. return an unknown value
-		return [{
+
+		const object = this.eepResolvers.map(fn => fn(eep, data)).filter(val => !!val);
+
+		// get the first non null resolved data or we obviuosly dont have an implementation for this eep yet
+		return object[0] || [{
 			type: "unknown",
 			unit: "unknown",
 			value: "unknown"
-		}]
+		}];
 	}
 
 	// a helper function

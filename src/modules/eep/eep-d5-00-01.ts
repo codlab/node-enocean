@@ -1,19 +1,18 @@
-export default function(eep,data){
-	var ret=null
-	var eepa=eep.split("-")
-	var choice=eepa[0]
-	var func=eepa[1]
-	var type=eepa[2]
-	var typeNr=parseInt(type,16)
+export default function(eep: string, data: string){
+	var eepa = eep.split("-")
+	var choice = eepa[0]
+	var func = eepa[1]
+	var type = eepa[2]
+	var typeNr = parseInt(type,16)
 
 	var i = (parseInt(data,16) & 1)
 	var contact=["open","closed"]
-	if(eep==="d5-00-01"){
-		return [{
-			type:"contact",
-			unit:"",
-			value: contact[i]
-		}]
-	}
-	return ret
+
+	if (eep !== "d5-00-01") return null;
+
+	return [{
+		type:"contact",
+		unit:"",
+		value: contact[i]
+	}]
 }

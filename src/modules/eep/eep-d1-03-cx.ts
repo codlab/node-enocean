@@ -1,15 +1,14 @@
-import Help from "./eepHelper"
-
-export default function(eep,data){
+export default function(eep: string, data: string){
 	var ret=null
 	var eepa=eep.split("-")
 	var choice=eepa[0]
 	var func=eepa[1]
 	var type=eepa[2]
 	var typeNr=parseInt(type,16)
-	if(choice==="d1" && func==="03" && type[0]=="c" && type[1]<3){
-		type=data.substring(2,4)
-		function convert(x){
+
+	if (choice==="d1" && func==="03" && type[0]=="c" && parseInt(type[1]) < 3) {
+		type = data.substring(2,4);
+		const convert = (x: number) => {
 			if(type=="c1"){
 				return (x*127.5)/255 -20
 			}else{
@@ -35,59 +34,59 @@ export default function(eep,data){
 			type:"temperature_ch1_1",
 			unit:"°C",
 			value: val11
-		},{
+		}, {
 			type:"temperature_ch1_2",
 			unit:"°C",
 			value: val12
-		},{
+		}, {
 			type:"temperature_ch1_3",
 			unit:"°C",
 			value: val13
-		},{
+		}, {
 			type:"temperature_ch2_1",
 			unit:"°C",
 			value: val21
-		},{
+		}, {
 			type:"temperature_ch2_2",
 			unit:"°C",
 			value: val22
-		},{
+		}, {
 			type:"temperature_ch2_3",
 			unit:"°C",
 			value: val23
-		},{
+		}, {
 			type:"temperature_ch3_1",
 			unit:"°C",
 			value: val31
-		},{
+		}, {
 			type:"temperature_ch3_2",
 			unit:"°C",
 			value: val32
-		},{
+		}, {
 			type:"temperature_ch3_3",
 			unit:"°C",
 			value: val33
-		},{
+		}, {
 			type:"temperature_internal",
 			unit:"°C",
 			value: valInt
-		},{
+		}, {
 			type:"power_source",
 			unit:"",
 			value: ps==0?"battery":"solar"
-		},{
+		}, {
 			type:"battery_status",
 			unit:"",
 			value: bs==0?"low":"normal"
-		},{
+		}, {
 			type:"sample_time",
 			unit:"s",
 			value: times[st]
-		},{
+		}, {
 			type:"range",
 			unit:"°C",
 			value: type=="c1"?"-20 to +100":"0 to +85"
-		},]
+		}]
 	}
 	return ret
 }

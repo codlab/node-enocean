@@ -16,7 +16,7 @@
 import eepf60203 from "./eep/eep-f6-02-03";
 // 1BS
 import eepd50001 from "./eep/eep-d5-00-01";
-//  4BS
+// 4BS
 import eepa502xx from "./eep/eep-a5-02-xx";
 import eepa50210bit from "./eep/eep-a5-02-10bit";
 import eepa504xx from "./eep/eep-a5-04-xx";

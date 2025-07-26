@@ -1,4 +1,4 @@
-export default function(eep,data){
+export default function(eep: string, data: string){
 	var ret=null
 	if(eep==="a5-30-01"){
 		var bat=parseInt(data.substring(2,4),16)
